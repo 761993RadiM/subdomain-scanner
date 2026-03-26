@@ -7,6 +7,9 @@ if [ -z "$DOMAIN" ]; then
   exit 1
 fi
 
+# PATH fix (Termux)
+export PATH=$PATH:~/go/bin
+
 mkdir -p output
 cd output
 
@@ -17,10 +20,11 @@ echo "🌐 Checking live domains..."
 httpx -l subs.txt -silent -o live.txt
 
 echo "🧨 Running scan..."
-nuclei -l live.txt -silent -severity critical,high,medium -o nuclei.txt
+nuclei -l live.txt -silent -severity critical,high,medium -o nuclei.txt 2>/dev/null
 
 echo "📡 Scanning ports..."
-nmap -iL live.txt -oN nmap.txt
+cat live.txt | sed 's|http[s]*://||' > hosts.txt
+nmap -iL hosts.txt -oN nmap.txt
 
 echo "📂 Checking sensitive files..."
 > findings.txt
