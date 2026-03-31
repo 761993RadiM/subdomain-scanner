@@ -30,7 +30,7 @@ sort -u subs.txt > final-subs.txt
 # ----------------------------
 echo "[2/8] Checking live hosts..."
 cat final-subs.txt | httpx -silent -status-code -title -tech-detect -json > live.json
-cat live.json | jq -r '.url' > live.txt
+cat live.json | jq -r '.host' > live.txt
 
 # ----------------------------
 # 3. PORT SCAN (light)
@@ -64,7 +64,7 @@ nuclei -l live.txt -silent -severity low,medium,high,critical -o vulns.txt
 # ----------------------------
 echo "[7/8] Light fuzzing..."
 head -n 10 live.txt | while read url; do
-  ffuf -u "$url/FUZZ" -w /data/data/com.termux/files/usr/share/wordlists/rockyou.txt -mc 200,403 -t 30 -maxtime 60 >> fuzz.txt
+  ffuf -u "$url/FUZZ" -w -w wordlist.txt -mc 200,403 -t 30 -maxtime 60 >> fuzz.txt
 done
 
 # ----------------------------
